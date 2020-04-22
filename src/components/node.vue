@@ -11,9 +11,10 @@
              @keydown.ctrl.delete.prevent="$emit('ctrl-delete')"
              @keydown.alt.enter.prevent="$emit('alt-enter')" ref="node">
             {{data.startY}}<br>
-            childrenHeight:{{data.childrenHeight}}<br>
+            ch:{{data.childrenHeight}}<br>
+            rch:{{data.childRealHeight}}<br>
             h{{data.h}}
-           
+            
         </div>
         <template v-if="data.expand">
             <node @alt-enter="addBrotherNode(index)"

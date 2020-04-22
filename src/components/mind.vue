@@ -28,19 +28,19 @@ export default {
         Node
     },
     props: {
-        msg: String
+        data: Array
     },
     data() {
         return {
             links: [],
             width: 0,
             height: 0,
-            nodes: [
+            nodes: this.data || [
                 {
                     id: 1,
                     deep: 0,
                     isRoot: true,
-                    x: Math.floor(window.innerWidth / 2 - 50),
+                    x: 10,
                     y: Math.floor(window.innerHeight / 2 - 40),
                     startY: Math.floor(window.innerHeight / 2 - 60),
                     w: 100,
@@ -90,13 +90,14 @@ export default {
         },
 
         calcChildrenHeight() {
-            var deep = 0;
-            var calc = node => {
+            let deep = 0;
+            const calc = node => {
                 if (node.children.length && node.expand) {
                     var h = 0;
                     node.children.forEach(item => {
                         h += calc(item);
                     });
+                    node.childRealHeight = h;
                     node.childrenHeight = Math.max(h, node.h + node.gap);
                     return h;
                 } else {
@@ -107,22 +108,29 @@ export default {
             };
             calc(this.nodes[0]);
 
-            var startY = obj => {
+            const calcStartY = obj => {
                 if (obj.children.length) {
+                    let startY = obj.startY;
+
+                    if (obj.childRealHeight < obj.h + obj.gap) {
+                        startY =
+                            obj.startY +
+                            (obj.h + obj.gap - obj.childRealHeight) / 2;
+                    }
                     [
                         {
-                            startY: obj.startY,
+                            startY,
                             childrenHeight: 0
                         },
                         ...obj.children
                     ].reduce((a, b) => {
                         b.startY = a.startY + a.childrenHeight;
-                        startY(b);
+                        calcStartY(b);
                         return b;
                     });
                 }
             };
-            startY(this.nodes[0]);
+            calcStartY(this.nodes[0]);
             this.width = this.nodes[0].x + (deep + 1) * 300 + 10 + "px";
         },
 
@@ -133,20 +141,24 @@ export default {
             });
         },
         calcPos() {
-            var calc = obj => {
+            const calc = obj => {
                 if (obj.expand && obj.children.length) {
                     obj.children.forEach(child => {
                         calc(child);
                     });
 
-                    var first = obj.children[0];
-                    var last = obj.children[obj.children.length - 1];
-                    var y1 =
+                    const first = obj.children[0];
+                    const last = obj.children[obj.children.length - 1];
+                    const y1 =
                         first.y +
                         first.h / 2 +
                         (last.y + last.h / 2 - first.y - first.h / 2) / 2 -
                         obj.h / 2;
 
+                    // obj.y =
+                    //     obj.childrenHeight <= obj.h + obj.gap
+                    //         ? (obj.startY + obj.gap / 2)
+                    //         : y1;
                     obj.y = y1;
                 } else {
                     obj.y = obj.startY + obj.gap / 2;
@@ -155,20 +167,25 @@ export default {
             calc(this.nodes[0]);
         },
         calcLinks() {
-            var links = [];
+            const links = [];
 
-            var calc = arr => {
+            const calc = arr => {
                 arr.forEach(item => {
-                    var p1 = [item.x + item.w, item.y + Math.floor(item.h / 2)];
-                    var p2 = [p1[0] + 20, p1[1]];
-                    var p3 = [p2[0] + 16, p1[1]];
+                    const p1 = [
+                        item.x + item.w,
+                        item.y + Math.floor(item.h / 2)
+                    ];
+                    const p2 = [p1[0] + 20, p1[1]];
+                    const p3 = [p2[0] + 16, p1[1]];
 
-                    var circle = `M${p2.join(" ")} A 8 8, 0, 1, 0, ${p3.join(
+                    const circle = `M${p2.join(" ")} A 8 8, 0, 1, 0, ${p3.join(
                         " "
                     )} A 8 8, 0, 1, 0, ${p2.join(" ")}`;
 
-                    var minus = `M${p2[0] + 4} ${p1[1]} L${p3[0] - 4} ${p1[1]}`;
-                    var vline = `M${p2[0] + (p3[0] - p2[0]) / 2} ${p1[1] -
+                    const minus = `M${p2[0] + 4} ${p1[1]} L${p3[0] - 4} ${
+                        p1[1]
+                    }`;
+                    const vline = `M${p2[0] + (p3[0] - p2[0]) / 2} ${p1[1] -
                         4} L${p2[0] + (p3[0] - p2[0]) / 2} ${p1[1] + 4}`;
 
                     if (item.children.length) {
@@ -183,11 +200,11 @@ export default {
                                 d: `${circle} ${minus}`
                             });
                             item.children.forEach(child => {
-                                var childPoint = [
+                                const childPoint = [
                                     child.x,
                                     child.y + Math.floor(child.h / 2)
                                 ];
-                                var qpoint = [
+                                const qpoint = [
                                     Math.floor((p3[0] + child.x) / 2) - 20,
                                     childPoint[1]
                                 ];
@@ -199,7 +216,6 @@ export default {
                             });
                             calc(item.children);
                         } else {
-                            var plus = ``;
                             links.push({
                                 type: "expand",
                                 node: item,

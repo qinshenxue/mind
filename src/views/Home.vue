@@ -13,7 +13,7 @@
             </div>
 
         </div>
-        <mind msg="Welcome to Your Vue.js App" />
+        <mind  />
 
     </div>
 </template>
@@ -26,6 +26,86 @@ export default {
     name: "Home",
     components: {
         mind
+    },
+    data() {
+        return {
+            data: [
+                {
+                    id: 1,
+                    deep: 0,
+                    isRoot: true,
+                    x: 10,
+                    y: 619,
+                    startY: 285,
+                    w: 100,
+                    h: 80,
+                    gap: 40,
+                    content: " 285 ch:360 h0 ",
+                    expand: true,
+                    childrenHeight: 360,
+                    children: [
+                        {
+                            id: 2,
+                            deep: 1,
+                            x: 310,
+                            y: 111,
+                            startY: 285,
+                            w: 100,
+                            h: 468,
+                            gap: 40,
+                            childrenHeight: 508,
+                            content:
+                                " 285 ch:508 h0 ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80285ch:120h80",
+                            expand: true,
+                            children: [
+                                {
+                                    id: 5,
+                                    deep: 2,
+                                    x: 610,
+                                    y: 305,
+                                    startY: 285,
+                                    w: 100,
+                                    h: 80,
+                                    gap: 40,
+                                    childrenHeight: 120,
+                                    content: " 285 ch:120 h0 ",
+                                    expand: true,
+                                    children: []
+                                }
+                            ]
+                        },
+                        {
+                            id: 3,
+                            deep: 1,
+                            x: 310,
+                            y: 813,
+                            startY: 793,
+                            w: 100,
+                            h: 80,
+                            gap: 40,
+                            childrenHeight: 120,
+                            content: "",
+                            expand: true,
+                            children: []
+                        },
+                        {
+                            id: 4,
+                            deep: 1,
+                            x: 310,
+                            y: 933,
+                            startY: 913,
+                            w: 100,
+                            h: 80,
+                            gap: 40,
+                            childrenHeight: 120,
+                            content: "",
+                            expand: true,
+                            children: []
+                        }
+                    ]
+                }
+            ]
+        };
     }
 };
 </script>
