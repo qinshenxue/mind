@@ -69,7 +69,6 @@ export default {
     methods: {
         onChange(id) {
             this.calcChildrenHeight();
-            this.calcRoot();
             this.calcPos();
             this.calcLinks();
             if (id) {
@@ -90,6 +89,7 @@ export default {
 
         calcChildrenHeight() {
             let deep = 0;
+            let rootNode = this.nodes[0];
             const calc = node => {
                 if (node.children.length && node.expand) {
                     var h = 0;
@@ -105,7 +105,7 @@ export default {
                     return node.childrenHeight;
                 }
             };
-            calc(this.nodes[0]);
+            calc(rootNode);
 
             const calcStartY = obj => {
                 if (obj.children.length) {
@@ -123,22 +123,18 @@ export default {
                         },
                         ...obj.children
                     ].reduce((a, b) => {
+                        b.x = obj.x + 300;
                         b.startY = a.startY + a.childrenHeight;
                         calcStartY(b);
                         return b;
                     });
                 }
             };
-            calcStartY(this.nodes[0]);
-            this.width = this.nodes[0].x + (deep + 1) * 300 + 10 + "px";
+            calcStartY(rootNode);
+            this.width = rootNode.x + (deep + 1) * 300 + 10 + "px";
+            this.height = rootNode.y + rootNode.childrenHeight + "px";
         },
 
-        calcRoot() {
-            this.nodes.forEach(item => {
-                this.height = item.y + item.childrenHeight + "px";
-                item.y = item.childrenHeight / 2 - item.h / 2;
-            });
-        },
         calcPos() {
             const calc = obj => {
                 if (obj.expand && obj.children.length) {
@@ -154,10 +150,6 @@ export default {
                         (last.y + last.h / 2 - first.y - first.h / 2) / 2 -
                         obj.h / 2;
 
-                    // obj.y =
-                    //     obj.childrenHeight <= obj.h + obj.gap
-                    //         ? (obj.startY + obj.gap / 2)
-                    //         : y1;
                     obj.y = y1;
                 } else {
                     obj.y = obj.startY + obj.gap / 2;

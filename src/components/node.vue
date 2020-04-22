@@ -1,16 +1,17 @@
 
 <template>
     <div>
-        <div class="node" :id="'node-'+data.id" @blur="onBlur" contenteditable
-             :style="{
+        <div class="node" :class="{'is-root':data.isRoot}" :id="'node-'+data.id"
+             @blur="onBlur" contenteditable :style="{
         top:data.y+'px',
         left:data.x+'px',
         minWidth:data.w+'px',
         minHeight:data.h+'px'
     }" @keydown.ctrl.enter.prevent="addChildNode"
              @keydown.ctrl.delete.prevent="$emit('ctrl-delete')"
-             @keydown.alt.enter.prevent="$emit('alt-enter')" ref="node">
-            {{data.content}}
+             @keydown.alt.enter.prevent="$emit('alt-enter')" ref="node"
+             @mousedown="dragStart" @paste.prevent="onPaste">
+
         </div>
         <template v-if="data.expand">
             <node @alt-enter="addBrotherNode(index)"
@@ -52,8 +53,8 @@ export default {
     },
 
     mounted() {
-        /*   document.addEventListener("mousemove", this.dragging);
-        document.addEventListener("mouseup", this.dragEnd); */
+        document.addEventListener("mousemove", this.dragging);
+        document.addEventListener("mouseup", this.dragEnd);
     },
     methods: {
         getUuid() {
@@ -73,6 +74,7 @@ export default {
                 h: 80,
                 gap: 40,
                 childrenHeight: 0,
+                edit: true,
                 content: "",
                 expand: true,
                 children: []
@@ -92,6 +94,7 @@ export default {
                 h: 80,
                 gap: 40,
                 childrenHeight: 0,
+                edit: true,
                 content: "",
                 expand: true,
                 children: []
@@ -102,12 +105,41 @@ export default {
             this.data.children.splice(i, 1);
             this.onChange();
         },
+
+        onPaste(e) {
+            var items = (e.clipboardData || window.clipboardData).items;
+            var file = null;
+            if (items && items.length) {
+                // 搜索剪切板items
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf("image") !== -1) {
+                        file = items[i].getAsFile();
+                        break;
+                    }
+                }
+            }
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    document.execCommand(
+                        "insertImage",
+                        false,
+                        event.target.result
+                    );
+                };
+                reader.readAsDataURL(file);
+            } else {
+                var clipboardData = e.clipboardData || window.clipboardData;
+                var pastedData = clipboardData.getData("Text");
+                document.execCommand("insertText", false, pastedData);
+            }
+        },
+
         onChange(id) {
             this.$emit("change", id);
         },
 
         onBlur(e) {
-            console.log(this.mind.focus);
             if (!this.mind.focus) {
                 this.data.h = 0;
                 this.$nextTick(function() {
@@ -118,27 +150,32 @@ export default {
                     this.onChange();
                 });
             }
+        },
+        dragStart(e) {
+            if (this.data.isRoot) {
+                window.clearTimeout(this.timeId);
+                this.timeId = setTimeout(() => {
+                    this.drag.start = true;
+                    this.drag.x1 = e.pageX;
+                    this.drag.y1 = e.pageY;
+                    this.drag.x = this.data.x;
+                    this.drag.y = this.data.startY;
+                }, 200);
+            }
+        },
+        dragging(e) {
+            if (this.drag.start) {
+                this.data.x = this.drag.x + e.pageX - this.drag.x1;
+                this.data.startY = this.drag.y + e.pageY - this.drag.y1;
+                this.$emit("change");
+            }
+        },
+        dragEnd() {
+            window.clearTimeout(this.timeId);
+            if (this.drag.start) {
+                this.drag.start = false;
+            }
         }
-        // dragStart(e) {
-        //     e.stopPropagation();
-        //     this.drag.start = true;
-        //     this.drag.x1 = e.pageX;
-        //     this.drag.y1 = e.pageY;
-        //     this.drag.top = this.top;
-        //     this.drag.left = this.left;
-        // },
-        // dragging(e) {
-        //     if (this.drag.start) {
-        //         this.top = this.drag.top + e.pageY - this.drag.y1;
-        //         //this.$emit("update:x", this.left);
-        //         this.$emit("update:y", this.top);
-        //     }
-        // },
-        // dragEnd() {
-        //     if (this.drag.start) {
-        //         this.drag.start = false;
-        //     }
-        // }
     }
 };
 </script>
@@ -155,6 +192,16 @@ export default {
 
     position: absolute;
     outline: none;
+
+    user-modify: read-write-plaintext-only;
+    // -webkit-user-modify: read-write-plaintext-only;
+    img {
+        display: block;
+        max-width: 100%;
+    }
+    &.is-root {
+        user-select: none;
+    }
     &:focus {
         border-color: #1396f4;
         box-shadow: fade(#1396f4, 30%) 0 0 0 4px;
