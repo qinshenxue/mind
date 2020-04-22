@@ -1,5 +1,9 @@
 # mind
 
+## Demo 
+
+[https://qinshenxue.github.io/mind/dist/index.html](https://qinshenxue.github.io/mind/dist/index.html)
+
 ## Project setup
 ```
 npm install
