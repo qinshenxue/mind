@@ -43,6 +43,7 @@ export default {
                     isRoot: true,
                     x: 10,
                     y: 0,
+                    startY: 0,
                     w: 100,
                     h: 80,
                     gap: 40,
@@ -91,6 +92,23 @@ export default {
                 }
             };
             calc(this.nodes[0]);
+
+            var startY = obj => {
+                if (obj.children.length) {
+                    [
+                        {
+                            startY: obj.startY,
+                            childrenHeight: 0
+                        },
+                        ...obj.children
+                    ].reduce((a, b) => {
+                        b.startY = a.startY + a.childrenHeight;
+                        startY(b);
+                        return b;
+                    });
+                }
+            };
+            startY(this.nodes[0]);
             this.width = (deep + 1) * 300 + 10 + "px";
         },
 
@@ -101,35 +119,24 @@ export default {
             });
         },
         calcPos() {
-            var check = arr => {
-                arr.forEach(item => {
-                    if (item.children.length) {
-                        var firstNode = item.children[0];
-                        [
-                            {
-                                y:
-                                    item.y +
-                                    item.h / 2 -
-                                    item.childrenHeight / 2,
-                                childrenHeight: 0,
-                                h: 0
-                            },
-                            ...item.children
-                        ].reduce((a, b) => {
-                            b.y =
-                                a.y +
-                                a.h / 2 +
-                                a.childrenHeight / 2 +
-                                b.childrenHeight / 2 -
-                                b.h / 2;
-                            return b;
-                        });
+            var calc = obj => {
+                if (obj.expand && obj.children.length) {
+                    obj.children.forEach(child => {
+                        calc(child);
+                    });
 
-                        check(item.children);
-                    }
-                });
+                    var first = obj.children[0];
+                    var last = obj.children[obj.children.length - 1];
+                    obj.y =
+                        first.y +
+                        first.h / 2 +
+                        (last.y + last.h / 2 - first.y - first.h / 2) / 2 -
+                        obj.h / 2;
+                } else {
+                    obj.y = obj.startY + obj.gap / 2;
+                }
             };
-            check(this.nodes);
+            calc(this.nodes[0]);
         },
         calcLinks() {
             var links = [];

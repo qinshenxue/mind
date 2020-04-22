@@ -7,16 +7,18 @@
         left:data.x+'px',
         minWidth:data.w+'px',
         minHeight:data.h+'px'
-    }" @keydown.ctrl.enter.prevent="addChildNode" @keydown.alt.enter.prevent="$emit('alt-enter')"  ref="node">
-            {{data.id}}<br>
+    }" @keydown.ctrl.enter.prevent="addChildNode"
+             @keydown.alt.enter.prevent="$emit('alt-enter')" ref="node">
+            {{data.childrenHeight}}<br>
+            {{data.startY}}
             <!-- {{data.x}}<br>
             id:{{data.id}} -->
         </div>
 
         <template v-if="data.expand">
-            <node @alt-enter="addBrotherNode(index)"
-                  @change="onChange" v-for="(item, index) in data.children"
-                  :key="index" :data="item">
+            <node @alt-enter="addBrotherNode(index)" @change="onChange"
+                  v-for="(item, index) in data.children" :key="index"
+                  :data="item">
             </node>
         </template>
 
@@ -79,6 +81,7 @@ export default {
                 deep: this.data.deep + 1,
                 x: this.data.x + 300,
                 y: 0,
+                startY: 0,
                 w: 100,
                 h: 80,
                 gap: 40,
@@ -91,11 +94,12 @@ export default {
             this.onChange();
         },
         addBrotherNode(i) {
-            this.data.children.splice(i+1, 0, {
+            this.data.children.splice(i + 1, 0, {
                 id: ++id,
                 deep: this.data.deep + 1,
                 x: this.data.x + 300,
                 y: 0,
+                startY: 0,
                 w: 100,
                 h: 80,
                 gap: 40,
