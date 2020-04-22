@@ -24,6 +24,11 @@
 import Node from "./node";
 export default {
     name: "mind",
+    provide() {
+        return {
+            mind: this
+        };
+    },
     components: {
         Node
     },
@@ -32,12 +37,15 @@ export default {
     },
     data() {
         return {
+            focus: false,
             links: [],
             width: 0,
             height: 0,
             nodes: this.data || [
                 {
-                    id: 1,
+                    id: Math.random()
+                        .toString(36)
+                        .slice(2),
                     deep: 0,
                     isRoot: true,
                     x: 10,
@@ -64,20 +72,11 @@ export default {
             this.calcRoot();
             this.calcPos();
             this.calcLinks();
-
             if (id) {
+                this.focus = true;
                 this.$nextTick(function() {
-                    const el = document.getElementById(`node-${id}`);
-
-                    if (el) {
-                        const rect = el.getBoundingClientRect();
-                        if (rect.bottom > window.innerHeight) {
-                            document.documentElement.scrollTop +=
-                                rect.bottom - window.innerHeight;
-                        } else if (rect.top < 0) {
-                            document.documentElement.scrollTop += rect.top;
-                        }
-                    }
+                    document.getElementById(`node-${id}`).focus();
+                    this.focus = false;
                 });
             }
         },

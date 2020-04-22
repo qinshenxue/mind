@@ -10,11 +10,7 @@
     }" @keydown.ctrl.enter.prevent="addChildNode"
              @keydown.ctrl.delete.prevent="$emit('ctrl-delete')"
              @keydown.alt.enter.prevent="$emit('alt-enter')" ref="node">
-            {{data.startY}}<br>
-            ch:{{data.childrenHeight}}<br>
-            rch:{{data.childRealHeight}}<br>
-            h{{data.h}}
-            
+            {{data.content}}
         </div>
         <template v-if="data.expand">
             <node @alt-enter="addBrotherNode(index)"
@@ -27,9 +23,9 @@
 </template>
 
 <script>
-var id = 1;
 export default {
     name: "node",
+    inject: ["mind"],
     props: {
         data: Object,
         index: Number,
@@ -60,9 +56,15 @@ export default {
         document.addEventListener("mouseup", this.dragEnd); */
     },
     methods: {
+        getUuid() {
+            return Math.random()
+                .toString(36)
+                .slice(2);
+        },
         addChildNode() {
+            const id = this.getUuid();
             this.data.children.push({
-                id: ++id,
+                id,
                 deep: this.data.deep + 1,
                 x: this.data.x + 300,
                 y: 0,
@@ -79,8 +81,9 @@ export default {
             this.onChange(id);
         },
         addBrotherNode(i) {
+            const id = this.getUuid();
             this.data.children.splice(i + 1, 0, {
-                id: ++id,
+                id,
                 deep: this.data.deep + 1,
                 x: this.data.x + 300,
                 y: 0,
@@ -97,21 +100,24 @@ export default {
         },
         delNode(i) {
             this.data.children.splice(i, 1);
-            this.onChange(this.data.id);
+            this.onChange();
         },
         onChange(id) {
             this.$emit("change", id);
         },
 
         onBlur(e) {
-            this.data.h = 0;
-            this.$nextTick(function() {
-                var rect = this.$refs.node.getBoundingClientRect();
-                this.data.w = Math.floor(rect.width);
-                this.data.h = Math.max(Math.floor(rect.height), 80);
-                this.data.content = e.target.textContent;
-                this.onChange();
-            });
+            console.log(this.mind.focus);
+            if (!this.mind.focus) {
+                this.data.h = 0;
+                this.$nextTick(function() {
+                    var rect = this.$refs.node.getBoundingClientRect();
+                    this.data.w = Math.floor(rect.width);
+                    this.data.h = Math.max(Math.floor(rect.height), 80);
+                    this.data.content = e.target.textContent;
+                    this.onChange();
+                });
+            }
         }
         // dragStart(e) {
         //     e.stopPropagation();
