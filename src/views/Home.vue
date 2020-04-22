@@ -134,5 +134,10 @@ kbd {
     position: absolute;
     font-size: 12px;
     line-height: 30px;
+    display: flex;
+    padding: 0 10px;
+    > div{
+        margin:0 10px;
+    }
 }
 </style>
