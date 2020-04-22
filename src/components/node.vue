@@ -1,29 +1,23 @@
 
 <template>
     <div>
-        <div class="node" @blur="onBlur" contenteditable @mousedown="dragStart"
-             :style="{
+        <div class="node" :id="'node-'+data.id" @blur="onBlur" contenteditable
+             @mousedown="dragStart" :style="{
         top:data.y+'px',
         left:data.x+'px',
         minWidth:data.w+'px',
         minHeight:data.h+'px'
     }" @keydown.ctrl.enter.prevent="addChildNode"
              @keydown.alt.enter.prevent="$emit('alt-enter')" ref="node">
-            {{data.childrenHeight}}<br>
-            {{data.startY}}
-            <!-- {{data.x}}<br>
-            id:{{data.id}} -->
+            {{data.content}}<br>
         </div>
-
         <template v-if="data.expand">
             <node @alt-enter="addBrotherNode(index)" @change="onChange"
                   v-for="(item, index) in data.children" :key="index"
                   :data="item">
             </node>
         </template>
-
     </div>
-
 </template>
 
 <script>
@@ -38,21 +32,6 @@ export default {
         w: Number,
         h: Number
     },
-
-    // watch: {
-    //     x(v) {
-    //         this.left = v;
-    //     },
-    //     y(v) {
-    //         this.top = v;
-    //     },
-    //     w(v) {
-    //         this.width = v;
-    //     },
-    //     h(v) {
-    //         this.height = v;
-    //     }
-    // },
 
     data() {
         return {
@@ -91,7 +70,7 @@ export default {
                 children: []
             });
 
-            this.onChange();
+            this.onChange(id);
         },
         addBrotherNode(i) {
             this.data.children.splice(i + 1, 0, {
@@ -108,21 +87,10 @@ export default {
                 expand: true,
                 children: []
             });
-            this.onChange();
+            this.onChange(id);
         },
-        onChange() {
-            // var h = 0;
-
-            // this.data.children.forEach(item => {
-
-            //     h += Math.max(
-            //         this.data.childrenHeight +
-            //             this.data.children.length * item.gap,
-            //         item.h + item.gap
-            //     );
-            // });
-            // this.data.childrenHeight = h;
-            this.$emit("change");
+        onChange(id) {
+            this.$emit("change", id);
         },
 
         onBlur(e) {
@@ -134,30 +102,27 @@ export default {
                 this.data.content = e.data;
                 this.onChange();
             });
-
-            /* this.$emit("update:w", rect.width);
-            this.$emit("update:h", rect.height); */
-        },
-        dragStart(e) {
-            e.stopPropagation();
-            this.drag.start = true;
-            this.drag.x1 = e.pageX;
-            this.drag.y1 = e.pageY;
-            this.drag.top = this.top;
-            this.drag.left = this.left;
-        },
-        dragging(e) {
-            if (this.drag.start) {
-                this.top = this.drag.top + e.pageY - this.drag.y1;
-                //this.$emit("update:x", this.left);
-                this.$emit("update:y", this.top);
-            }
-        },
-        dragEnd() {
-            if (this.drag.start) {
-                this.drag.start = false;
-            }
         }
+        // dragStart(e) {
+        //     e.stopPropagation();
+        //     this.drag.start = true;
+        //     this.drag.x1 = e.pageX;
+        //     this.drag.y1 = e.pageY;
+        //     this.drag.top = this.top;
+        //     this.drag.left = this.left;
+        // },
+        // dragging(e) {
+        //     if (this.drag.start) {
+        //         this.top = this.drag.top + e.pageY - this.drag.y1;
+        //         //this.$emit("update:x", this.left);
+        //         this.$emit("update:y", this.top);
+        //     }
+        // },
+        // dragEnd() {
+        //     if (this.drag.start) {
+        //         this.drag.start = false;
+        //     }
+        // }
     }
 };
 </script>

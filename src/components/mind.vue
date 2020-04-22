@@ -24,7 +24,7 @@
 <script>
 import Node from "./node";
 export default {
-    name: "HelloWorld",
+    name: "mind",
     components: {
         Node
     },
@@ -41,9 +41,9 @@ export default {
                     id: 1,
                     deep: 0,
                     isRoot: true,
-                    x: 10,
-                    y: 0,
-                    startY: 0,
+                    x: 300,
+                    y: 320,
+                    startY: 300,
                     w: 100,
                     h: 80,
                     gap: 40,
@@ -60,18 +60,33 @@ export default {
     },
     computed: {},
     methods: {
-        onChange() {
+        onChange(id) {
             this.calcChildrenHeight();
             this.calcRoot();
             this.calcPos();
             this.calcLinks();
+
+            if (id) {
+                this.$nextTick(function() {
+                    const el = document.getElementById(`node-${id}`);
+
+                    if (el) {
+                        const rect = el.getBoundingClientRect();
+                        if (rect.bottom > window.innerHeight) {
+                            document.documentElement.scrollTop +=
+                                rect.bottom - window.innerHeight;
+                        } else if (rect.top < 0) {
+                            document.documentElement.scrollTop += rect.top;
+                        }
+                    }
+                });
+            }
         },
 
         expandChild(data) {
-            // console.log(data)
             if (data.type == "expand") {
                 data.node.expand = !data.node.expand;
-                this.onChange();
+                this.onChange(data.node.id);
             }
         },
 
@@ -109,12 +124,12 @@ export default {
                 }
             };
             startY(this.nodes[0]);
-            this.width = (deep + 1) * 300 + 10 + "px";
+            this.width = this.nodes[0].x + (deep + 1) * 300 + 10 + "px";
         },
 
         calcRoot() {
             this.nodes.forEach(item => {
-                this.height = item.childrenHeight + "px";
+                this.height = item.y + item.childrenHeight + "px";
                 item.y = item.childrenHeight / 2 - item.h / 2;
             });
         },
@@ -201,11 +216,8 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less">
 .mind {
     position: relative;
-    svg {
-    }
 }
 </style>
