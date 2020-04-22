@@ -8,7 +8,6 @@
       width:width,
       height:height,
     }" version="1.1" xmlns="http://www.w3.org/2000/svg">
-
             <path @click="expandChild(item)" v-for="(item, index) in links"
                   :key="index" :d="item.d" stroke="#333" fill="transparent"
                   stroke-width="2px">
@@ -41,9 +40,9 @@ export default {
                     id: 1,
                     deep: 0,
                     isRoot: true,
-                    x: 300,
-                    y: 320,
-                    startY: 300,
+                    x: Math.floor(window.innerWidth / 2 - 50),
+                    y: Math.floor(window.innerHeight / 2 - 40),
+                    startY: Math.floor(window.innerHeight / 2 - 60),
                     w: 100,
                     h: 80,
                     gap: 40,
@@ -142,11 +141,13 @@ export default {
 
                     var first = obj.children[0];
                     var last = obj.children[obj.children.length - 1];
-                    obj.y =
+                    var y1 =
                         first.y +
                         first.h / 2 +
                         (last.y + last.h / 2 - first.y - first.h / 2) / 2 -
                         obj.h / 2;
+
+                    obj.y = y1;
                 } else {
                     obj.y = obj.startY + obj.gap / 2;
                 }
@@ -156,60 +157,60 @@ export default {
         calcLinks() {
             var links = [];
 
-            var dg = arr => {
+            var calc = arr => {
                 arr.forEach(item => {
-                    var p1 = [item.x + item.w + 40, item.y + item.h / 2];
+                    var p1 = [item.x + item.w, item.y + Math.floor(item.h / 2)];
+                    var p2 = [p1[0] + 20, p1[1]];
+                    var p3 = [p2[0] + 16, p1[1]];
+
+                    var circle = `M${p2.join(" ")} A 8 8, 0, 1, 0, ${p3.join(
+                        " "
+                    )} A 8 8, 0, 1, 0, ${p2.join(" ")}`;
+
+                    var minus = `M${p2[0] + 4} ${p1[1]} L${p3[0] - 4} ${p1[1]}`;
+                    var vline = `M${p2[0] + (p3[0] - p2[0]) / 2} ${p1[1] -
+                        4} L${p2[0] + (p3[0] - p2[0]) / 2} ${p1[1] + 4}`;
 
                     if (item.children.length) {
                         links.push({
-                            d: `M${p1[0] - 40} ${p1[1]} L${p1[0] - 16} ${p1[1]}`
+                            d: `M${p1.join(" ")} L${p2.join(" ")}`
                         });
 
                         if (item.expand) {
                             links.push({
                                 type: "expand",
                                 node: item,
-                                d: `M${p1[0] - 16} ${p1[1]} A 8 8, 0, 1, 0, ${
-                                    p1[0]
-                                } ${p1[1]} A 8 8, 0, 1, 0, ${p1[0] - 16} ${
-                                    p1[1]
-                                } M${p1[0] - 12} ${p1[1]} L${p1[0] - 4} ${
-                                    p1[1]
-                                }`
+                                d: `${circle} ${minus}`
                             });
                             item.children.forEach(child => {
-                                var p3 = [child.x, child.y + child.h / 2];
-                                var p2 = [
-                                    (p1[0] + child.x) / 2 - 50,
-                                    child.y + child.h / 2
+                                var childPoint = [
+                                    child.x,
+                                    child.y + Math.floor(child.h / 2)
+                                ];
+                                var qpoint = [
+                                    Math.floor((p3[0] + child.x) / 2) - 20,
+                                    childPoint[1]
                                 ];
                                 links.push({
-                                    d: `M${p1.join(" ")} Q ${p2.join(
+                                    d: `M${p3.join(" ")} Q ${qpoint.join(
                                         " "
-                                    )} ${p3.join(" ")} `
+                                    )} ${childPoint.join(" ")} `
                                 });
                             });
-                            dg(item.children);
+                            calc(item.children);
                         } else {
+                            var plus = ``;
                             links.push({
                                 type: "expand",
                                 node: item,
-                                d: `M${p1[0] - 16} ${p1[1]} A 8 8, 0, 1, 0, ${
-                                    p1[0]
-                                } ${p1[1]} A 8 8, 0, 1, 0, ${p1[0] - 16} ${
-                                    p1[1]
-                                } M${p1[0] - 12} ${p1[1]} L${p1[0] - 4} ${
-                                    p1[1]
-                                } M${p1[0] - 8} ${p1[1] - 4} L${p1[0] -
-                                    8} ${p1[1] + 4}`
+                                d: `${circle} ${minus} ${vline}`
                             });
                         }
                     }
                 });
             };
 
-            dg(this.nodes);
-
+            calc(this.nodes);
             this.links = links;
         }
     }

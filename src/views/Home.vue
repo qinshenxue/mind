@@ -51,6 +51,7 @@ kbd {
     text-shadow: 0 1px 0 #fff;
 }
 .shortcut-key {
+    position: absolute;
     font-size: 12px;
     line-height: 30px;
 }

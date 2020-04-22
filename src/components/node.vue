@@ -10,7 +10,10 @@
     }" @keydown.ctrl.enter.prevent="addChildNode"
              @keydown.ctrl.delete.prevent="$emit('ctrl-delete')"
              @keydown.alt.enter.prevent="$emit('alt-enter')" ref="node">
-            {{data.content}}<br>
+            {{data.startY}}<br>
+            childrenHeight:{{data.childrenHeight}}<br>
+            h{{data.h}}
+           
         </div>
         <template v-if="data.expand">
             <node @alt-enter="addBrotherNode(index)"
@@ -103,8 +106,8 @@ export default {
             this.data.h = 0;
             this.$nextTick(function() {
                 var rect = this.$refs.node.getBoundingClientRect();
-                this.data.w = rect.width;
-                this.data.h = Math.max(rect.height, 80);
+                this.data.w = Math.floor(rect.width);
+                this.data.h = Math.max(Math.floor(rect.height), 80);
                 this.data.content = e.target.textContent;
                 this.onChange();
             });
