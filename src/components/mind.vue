@@ -47,7 +47,7 @@ export default {
                     w: 100,
                     h: 80,
                     gap: 40,
-                    content: "",
+                    content: "中心主题",
                     expand: true,
                     childrenHeight: 0,
                     children: []

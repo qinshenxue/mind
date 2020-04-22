@@ -2,17 +2,19 @@
 <template>
     <div>
         <div class="node" :id="'node-'+data.id" @blur="onBlur" contenteditable
-             @mousedown="dragStart" :style="{
+             :style="{
         top:data.y+'px',
         left:data.x+'px',
         minWidth:data.w+'px',
         minHeight:data.h+'px'
     }" @keydown.ctrl.enter.prevent="addChildNode"
+             @keydown.ctrl.delete.prevent="$emit('ctrl-delete')"
              @keydown.alt.enter.prevent="$emit('alt-enter')" ref="node">
             {{data.content}}<br>
         </div>
         <template v-if="data.expand">
-            <node @alt-enter="addBrotherNode(index)" @change="onChange"
+            <node @alt-enter="addBrotherNode(index)"
+                  @ctrl-delete="delNode(index)" @change="onChange"
                   v-for="(item, index) in data.children" :key="index"
                   :data="item">
             </node>
@@ -89,6 +91,10 @@ export default {
             });
             this.onChange(id);
         },
+        delNode(i) {
+            this.data.children.splice(i, 1);
+            this.onChange(this.data.id);
+        },
         onChange(id) {
             this.$emit("change", id);
         },
@@ -99,7 +105,7 @@ export default {
                 var rect = this.$refs.node.getBoundingClientRect();
                 this.data.w = rect.width;
                 this.data.h = Math.max(rect.height, 80);
-                this.data.content = e.data;
+                this.data.content = e.target.textContent;
                 this.onChange();
             });
         }
