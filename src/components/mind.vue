@@ -180,7 +180,7 @@ export default {
                             item.children.forEach(child => {
                                 var p3 = [child.x, child.y + child.h / 2];
                                 var p2 = [
-                                    (p1[0] + child.x) / 2,
+                                    (p1[0] + child.x) / 2 - 50,
                                     child.y + child.h / 2
                                 ];
                                 links.push({
